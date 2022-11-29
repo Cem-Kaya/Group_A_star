@@ -32,6 +32,9 @@
 			this.port_box = new System.Windows.Forms.TextBox();
 			this.logs = new System.Windows.Forms.RichTextBox();
 			this.launch_button = new System.Windows.Forms.Button();
+			this.label2 = new System.Windows.Forms.Label();
+			this.number_of_questions = new System.Windows.Forms.TextBox();
+			this.Set_question_number = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// label1
@@ -46,15 +49,16 @@
 			// port_box
 			// 
 			this.port_box.Cursor = System.Windows.Forms.Cursors.AppStarting;
-			this.port_box.Location = new System.Drawing.Point(103, 74);
+			this.port_box.Location = new System.Drawing.Point(96, 67);
 			this.port_box.Name = "port_box";
 			this.port_box.Size = new System.Drawing.Size(100, 20);
 			this.port_box.TabIndex = 1;
+			this.port_box.Text = "1515";
 			this.port_box.TextChanged += new System.EventHandler(this.port_box_TextChanged);
 			// 
 			// logs
 			// 
-			this.logs.Location = new System.Drawing.Point(65, 121);
+			this.logs.Location = new System.Drawing.Point(60, 129);
 			this.logs.Name = "logs";
 			this.logs.Size = new System.Drawing.Size(374, 193);
 			this.logs.TabIndex = 2;
@@ -63,19 +67,49 @@
 			// 
 			// launch_button
 			// 
-			this.launch_button.Location = new System.Drawing.Point(364, 74);
+			this.launch_button.Location = new System.Drawing.Point(218, 64);
 			this.launch_button.Name = "launch_button";
 			this.launch_button.Size = new System.Drawing.Size(75, 23);
 			this.launch_button.TabIndex = 3;
-			this.launch_button.Text = "launch";
+			this.launch_button.Text = "launch Server";
 			this.launch_button.UseVisualStyleBackColor = true;
 			this.launch_button.Click += new System.EventHandler(this.launch_button_Click);
+			// 
+			// label2
+			// 
+			this.label2.AutoSize = true;
+			this.label2.Location = new System.Drawing.Point(57, 106);
+			this.label2.Name = "label2";
+			this.label2.Size = new System.Drawing.Size(106, 13);
+			this.label2.TabIndex = 4;
+			this.label2.Text = "Number of Questions";
+			// 
+			// number_of_questions
+			// 
+			this.number_of_questions.Location = new System.Drawing.Point(169, 103);
+			this.number_of_questions.Name = "number_of_questions";
+			this.number_of_questions.Size = new System.Drawing.Size(100, 20);
+			this.number_of_questions.TabIndex = 5;
+			this.number_of_questions.Text = "3";
+			// 
+			// Set_question_number
+			// 
+			this.Set_question_number.Location = new System.Drawing.Point(287, 100);
+			this.Set_question_number.Name = "Set_question_number";
+			this.Set_question_number.Size = new System.Drawing.Size(75, 23);
+			this.Set_question_number.TabIndex = 6;
+			this.Set_question_number.Text = "Set question number";
+			this.Set_question_number.UseVisualStyleBackColor = true;
+			this.Set_question_number.Click += new System.EventHandler(this.Set_question_number_Click);
 			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(600, 366);
+			this.ClientSize = new System.Drawing.Size(600, 449);
+			this.Controls.Add(this.Set_question_number);
+			this.Controls.Add(this.number_of_questions);
+			this.Controls.Add(this.label2);
 			this.Controls.Add(this.launch_button);
 			this.Controls.Add(this.logs);
 			this.Controls.Add(this.port_box);
@@ -94,6 +128,9 @@
 		private System.Windows.Forms.TextBox port_box;
 		private System.Windows.Forms.RichTextBox logs;
 		private System.Windows.Forms.Button launch_button;
+		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.TextBox number_of_questions;
+		private System.Windows.Forms.Button Set_question_number;
 	}
 }
 
