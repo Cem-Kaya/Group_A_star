@@ -1,0 +1,10 @@
+C:\dev\Academic\CS College Projects\CS408Project\CS_408_A_star\Server\Server\bin\Debug\Server.exe.config
+C:\dev\Academic\CS College Projects\CS408Project\CS_408_A_star\Server\Server\bin\Debug\Server.exe
+C:\dev\Academic\CS College Projects\CS408Project\CS_408_A_star\Server\Server\bin\Debug\Server.pdb
+C:\dev\Academic\CS College Projects\CS408Project\CS_408_A_star\Server\Server\obj\Debug\Server.csproj.AssemblyReference.cache
+C:\dev\Academic\CS College Projects\CS408Project\CS_408_A_star\Server\Server\obj\Debug\Server.csproj.SuggestedBindingRedirects.cache
+C:\dev\Academic\CS College Projects\CS408Project\CS_408_A_star\Server\Server\obj\Debug\Server.Properties.Resources.resources
+C:\dev\Academic\CS College Projects\CS408Project\CS_408_A_star\Server\Server\obj\Debug\Server.csproj.GenerateResource.cache
+C:\dev\Academic\CS College Projects\CS408Project\CS_408_A_star\Server\Server\obj\Debug\Server.csproj.CoreCompileInputs.cache
+C:\dev\Academic\CS College Projects\CS408Project\CS_408_A_star\Server\Server\obj\Debug\Server.exe
+C:\dev\Academic\CS College Projects\CS408Project\CS_408_A_star\Server\Server\obj\Debug\Server.pdb
