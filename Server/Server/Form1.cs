@@ -16,19 +16,25 @@ namespace Server
 {
 	public partial class Form1 : Form
 	{
+		String[] lines;
+		bool terminating = false;
+		bool listening = false;
+		bool question = false;
+		int question_num;
+		uint max_num_of_clients = 2;
+		uint num_of_players = 0;
+
 		Socket server_socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 		List<Socket> client_sockets = new List<Socket>();
 		List<String> client_names = new List<String>();
-		bool terminating = false;
-		bool listening = false;
-		uint max_num_of_clients = 2;
-		uint num_of_players = 0;
-        Dictionary<Socket,uint> player_scores = new Dictionary<Socket, uint>();
+		
+		Semaphore first_sem = new Semaphore(0, 3); //  for step one 3 is known 
+		Semaphore sem = new Semaphore(0, 2); // 2 is the number of players 
 
+		Dictionary<String, float> player_scores = new Dictionary<String, float>();
+		Dictionary<String, int> ans = new Dictionary<String, int>();
 
-
-
-        public Form1()
+		public Form1()
 		{
 			Control.CheckForIllegalCrossThreadCalls = false;
 			this.FormClosing += new FormClosingEventHandler(Form1_FormClosing);
@@ -189,10 +195,7 @@ namespace Server
 			return lines;
 		}
 
-		Semaphore first_sem = new Semaphore(0, 3);
 
-		Dictionary<String, int> ans = new Dictionary<String, int>();
-		Semaphore  sem = new Semaphore(0, 2);
 		private void game_loop()
 		{
 			first_sem.WaitOne();
@@ -201,11 +204,17 @@ namespace Server
 
 			logs.AppendText("got past the lock the game shall start now !\n");
 			int q = 0;
-			while (question_num > 0){
-				foreach(Socket cl in client_sockets)
+			foreach(var pl in client_names)
+			{
+				player_scores[pl] = 0.0f;
+			}
+			
+			while (question_num > 0)
+			{
+				foreach (Socket cl in client_sockets)
 				{
-					String this_question = lines[(2 * q) % ( lines.Length /2 ) ];
-					Byte[] question__ = Encoding.Default.GetBytes("QUEST"+this_question);
+					String this_question = lines[(2 * q) % (lines.Length / 2)];
+					Byte[] question__ = Encoding.Default.GetBytes("QUEST" + this_question + "\n");
 					try
 					{
 						cl.Send(question__);
@@ -221,27 +230,106 @@ namespace Server
 				sem.WaitOne();
 				sem.WaitOne();
 
-                
-				foreach(string client_name in client_names)
+				Dictionary<string, int> name_dif = new Dictionary<string, int>();
+
+				foreach (string client_name in client_names)
 				{
 					int answer;
-					if(Int32.TryParse(lines[(2 * q) % (lines.Length / 2) + 1], out answer))
+					if (Int32.TryParse(lines[(2 * q) % (lines.Length / 2) + 1], out answer))
 					{
 						int client_answer = ans[client_name];
-						int difference = Math.Abs(answer - client_answer); 					
-						
-					}
+						int difference = Math.Abs(answer - client_answer);
+						name_dif[client_name] = difference;
 
+
+					}
 				}
+				var sortedDict = from entry in name_dif orderby entry.Value ascending select entry;
+				//logs.AppendText("The winner is " + sortedDict.First().Key + " with a difference of " + sortedDict.First().Value + "\n");
+				int max_score = sortedDict.First().Value;
+				
+				// magic !
+				var keys = sortedDict.Where(x => x.Value == max_score).Select(x => x.Key);
+				
+				foreach(String Pl in keys)
+				{
+					player_scores[Pl] += 1/keys.Count();
+				}
+				
+				String answare_info = "Answers: real : "+ lines[(2 * q) % (lines.Length / 2) + 1 ] + "\n";
+				foreach(var pl in client_names)
+				{
+					answare_info += pl + " : " + ans[pl] + " ";
+				}
+				answare_info += "\n";
+
+
+				foreach (Socket cl in client_sockets)
+				{					
+					Byte[] question__ = Encoding.Default.GetBytes("ANSWE" + answare_info);
+					try
+					{
+						cl.Send(question__);
+					}
+					catch
+					{
+						logs.AppendText("Could not send question \n");
+						// if client is disconnected, do stuff here 
+					}
+				}
+
+				String score_info = "Current scores: ";
+				foreach (var pl in client_names)
+				{
+					score_info += pl + " : " + player_scores[pl] + " ";
+				}
+				score_info += "\n";
+
+				foreach (Socket cl in client_sockets)
+				{
+					Byte[] question__ = Encoding.Default.GetBytes("SCORE" + score_info);
+					try
+					{
+						cl.Send(question__);
+					}
+					catch
+					{
+						logs.AppendText("Could not send question \n");
+						// if client is disconnected, do stuff here 
+					}
+				}
+
 
 				question_num--;
 				q++;
 			}
-		}
 
-		bool question = false;
-		int question_num;
-		String[] lines; 
+
+			
+			var sortedDict2 = from entry in player_scores orderby entry.Value descending select entry;
+			String end_of_game = "The game has ended !" + "\n " + "The winner is " + sortedDict2.First().Key + " with a score of " + sortedDict2.First().Value + "\n";
+			
+			foreach (Socket cl in client_sockets)
+			{				
+				Byte[] send_buff_ = Encoding.Default.GetBytes("GMOVR" + end_of_game + "\n");
+				try
+				{
+					cl.Send(send_buff_);
+				}
+				catch
+				{
+					logs.AppendText("Could not send end game data \n");
+					// if client is disconnected, do stuff here 
+				}
+				
+			}
+			Thread.Sleep(1000);
+			foreach (Socket cl in client_sockets)
+			{
+				cl.Close();
+			}
+
+		}
 
 		private void Set_question_number_Click(object sender, EventArgs e)
 		{			
@@ -253,7 +341,6 @@ namespace Server
 				Set_question_number.Enabled = false;
 				logs.AppendText("number of questions: " + question_num + "\n");
 				first_sem.Release();//#UP
-
 			}
 			else
 			{
