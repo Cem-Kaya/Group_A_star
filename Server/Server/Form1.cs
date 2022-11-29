@@ -15,19 +15,19 @@ namespace Server
 {
 	public partial class Form1 : Form
 	{
-        Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        List<Socket> clientSockets = new List<Socket>();
-        public Form1()
+		Socket serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+		List<Socket> clientSockets = new List<Socket>();
+		public Form1()
 		{
-            Control.CheckForIllegalCrossThreadCalls = false;
-            this.FormClosing += new FormClosingEventHandler(Form1_FormClosing);
-            InitializeComponent();
+			Control.CheckForIllegalCrossThreadCalls = false;
+			this.FormClosing += new FormClosingEventHandler(Form1_FormClosing);
+			InitializeComponent();
 		}
 
 
-        private void Form1_FormClosing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            Environment.Exit(0);
-        }
-    }
+		private void Form1_FormClosing(object sender, System.ComponentModel.CancelEventArgs e)
+		{
+			Environment.Exit(0);
+		}
+	}
 }

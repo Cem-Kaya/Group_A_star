@@ -19,17 +19,17 @@ namespace Client
 		private Socket m_ClientSocket;
 		public Form1()
 		{
-            Control.CheckForIllegalCrossThreadCalls = false;
-            this.FormClosing += new FormClosingEventHandler(Form1_FormClosing);
-            InitializeComponent();
+			Control.CheckForIllegalCrossThreadCalls = false;
+			this.FormClosing += new FormClosingEventHandler(Form1_FormClosing);
+			InitializeComponent();
 		}
 
-        private void Form1_FormClosing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            Environment.Exit(0);
-        }
+		private void Form1_FormClosing(object sender, System.ComponentModel.CancelEventArgs e)
+		{
+			Environment.Exit(0);
+		}
 
-        private void connectButton_Click(object sender, EventArgs e)
+		private void connectButton_Click(object sender, EventArgs e)
 		{
 			m_ClientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 			string IpAddress = IPValue.Text;
@@ -59,14 +59,14 @@ namespace Client
 			{
 				try
 				{
-                    Byte[] buffer = new Byte[64];
-                    m_ClientSocket.Receive(buffer);
+					Byte[] buffer = new Byte[64];
+					m_ClientSocket.Receive(buffer);
 
-                    string incomingMessage = Encoding.Default.GetString(buffer);
-                    incomingMessage = incomingMessage.Substring(0, incomingMessage.IndexOf("\0"));
+					string incomingMessage = Encoding.Default.GetString(buffer);
+					incomingMessage = incomingMessage.Substring(0, incomingMessage.IndexOf("\0"));
 
-                    logs.AppendText("Server: " + incomingMessage + "\n");
-                }
+					logs.AppendText("Server: " + incomingMessage + "\n");
+				}
 				catch
 				{
 					m_ClientSocket.Close();
