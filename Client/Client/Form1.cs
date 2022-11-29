@@ -45,6 +45,8 @@ namespace Client
 
 					Thread recieveThread = new Thread(Recieve);
 					recieveThread.Start();
+					logs.AppendText("Failed to connect to the server!\n");
+
 				}
 				catch
 				{
@@ -73,6 +75,11 @@ namespace Client
 					m_Connected = false;
 				}
 			}
+		}
+
+		private void IPValue_TextChanged(object sender, EventArgs e)
+		{
+
 		}
 	}
 }

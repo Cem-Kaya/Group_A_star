@@ -8,3 +8,14 @@ C:\dev\Academic\CS College Projects\CS408Project\CS_408_A_star\Server\Server\obj
 C:\dev\Academic\CS College Projects\CS408Project\CS_408_A_star\Server\Server\obj\Debug\Server.csproj.CoreCompileInputs.cache
 C:\dev\Academic\CS College Projects\CS408Project\CS_408_A_star\Server\Server\obj\Debug\Server.exe
 C:\dev\Academic\CS College Projects\CS408Project\CS_408_A_star\Server\Server\obj\Debug\Server.pdb
+W:\Sabanci_Univ\Sabanci_Uni\4_2\CS_408\Project\CS_408_a_star\Server\Server\bin\Debug\Server.exe.config
+W:\Sabanci_Univ\Sabanci_Uni\4_2\CS_408\Project\CS_408_a_star\Server\Server\bin\Debug\Server.exe
+W:\Sabanci_Univ\Sabanci_Uni\4_2\CS_408\Project\CS_408_a_star\Server\Server\bin\Debug\Server.pdb
+W:\Sabanci_Univ\Sabanci_Uni\4_2\CS_408\Project\CS_408_a_star\Server\Server\obj\Debug\Server.csproj.AssemblyReference.cache
+W:\Sabanci_Univ\Sabanci_Uni\4_2\CS_408\Project\CS_408_a_star\Server\Server\obj\Debug\Server.csproj.SuggestedBindingRedirects.cache
+W:\Sabanci_Univ\Sabanci_Uni\4_2\CS_408\Project\CS_408_a_star\Server\Server\obj\Debug\Server.Form1.resources
+W:\Sabanci_Univ\Sabanci_Uni\4_2\CS_408\Project\CS_408_a_star\Server\Server\obj\Debug\Server.Properties.Resources.resources
+W:\Sabanci_Univ\Sabanci_Uni\4_2\CS_408\Project\CS_408_a_star\Server\Server\obj\Debug\Server.csproj.GenerateResource.cache
+W:\Sabanci_Univ\Sabanci_Uni\4_2\CS_408\Project\CS_408_a_star\Server\Server\obj\Debug\Server.csproj.CoreCompileInputs.cache
+W:\Sabanci_Univ\Sabanci_Uni\4_2\CS_408\Project\CS_408_a_star\Server\Server\obj\Debug\Server.exe
+W:\Sabanci_Univ\Sabanci_Uni\4_2\CS_408\Project\CS_408_a_star\Server\Server\obj\Debug\Server.pdb
