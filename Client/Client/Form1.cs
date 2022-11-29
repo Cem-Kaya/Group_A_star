@@ -54,9 +54,11 @@ namespace Client
 
 					Byte[] buffer2 = new Byte[64];
 					m_ClientSocket.Receive(buffer2);
-
+					logs_debug.AppendText("whyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
 					string incomingMessage = Encoding.Default.GetString(buffer2);
 					incomingMessage = incomingMessage.Substring(0, incomingMessage.IndexOf("\0"));
+					//debug
+					logs_debug.AppendText("\n\n" + incomingMessage);
 
 					if (incomingMessage == "this name is taken!")
 					{
@@ -67,7 +69,7 @@ namespace Client
 					}
 					else
 					{
-                        
+						
 						recieveThread = new Thread(Recieve);
 						recieveThread.Start();
 						logs.AppendText("Connected to the server!\n");
@@ -90,31 +92,56 @@ namespace Client
 				try
 				{
 					Byte[] buffer = new Byte[1024];
-					Byte[] buffer2 = new Byte[1024];
 					m_ClientSocket.Receive(buffer);
 
-					string incoming_message = Encoding.Default.GetString(buffer);
-					string type = incoming_message.Substring(0, 5);
-					//logs.AppendText("Server: " + incoming_message + "\n");
-					
-					if(type == "QUEST")
+					String incoming_message = Encoding.Default.GetString(buffer);
+					//debug                        incoming_message
+					logs_debug.AppendText("\n\n" + incoming_message);
+
+					String type = incoming_message.Substring(0, 5);
+					incoming_message = incoming_message.Substring(5, incoming_message.IndexOf("\0")-5);
+					//logs.AppendText("CHECKING QUEST ERROR  " + incoming_message + "\n");
+					logs_debug.AppendText("\n type :::: " + type + "\n");
+
+					if (type == "QUEST")
 					{
 						button_send_answer.Enabled = true;
-						string question_line = Encoding.Default.GetString(buffer);
-						question_line = question_line.Substring(5, question_line.IndexOf("\0"));
-						logs.AppendText("Server Asks: " + question_line);	
+						String question_line = incoming_message;
+						logs.AppendText("Server Asks: " + question_line + "\n");
+					}
+					if (type == "SCORE")
+					{
+						button_send_answer.Enabled = true;
+						String score_table = incoming_message;
+						logs.AppendText("\n"+score_table +"\n");
+					}
+					if (type == "ANSWE")
+					{
+						button_send_answer.Enabled = true;
+						String answer_table = incoming_message;
+						logs.AppendText("\n" + answer_table + "\n");
+					}
+					if (type == "GMOVR")
+					{
+						button_send_answer.Enabled = false;
+						String winner = incoming_message;
+						logs.AppendText("\n" + winner + "\n");
 					}
 				}
 				catch
 				{
-					m_ClientSocket.Close();
+					button_disconnect.Enabled = false;
+					try
+					{
+						m_ClientSocket.Close();
+					}
+					catch
+					{}
 					m_Connected = false;
-                    logs.AppendText("Should be disconnecting now \n");
-                    button_disconnect.Enabled = false;
-                    connectButton.Enabled = true;
-                    
+					logs.AppendText("Should be disconnecting now \n");
 					
-                }
+					connectButton.Enabled = true;
+				}
 			}
 						
 		}
@@ -145,9 +172,9 @@ namespace Client
 		private void button_send_answer_Click(object sender, EventArgs e)
 		{
 			string answer = textBox_answer.Text;
-	        Byte[] buffer = Encoding.Default.GetBytes(answer);
+			Byte[] buffer = Encoding.Default.GetBytes(answer);
 			m_ClientSocket.Send(buffer);
-            button_send_answer.Enabled = false;
-        }
+			button_send_answer.Enabled = false;
+		}
 	}
 }

@@ -40,6 +40,7 @@
             this.textBox_answer = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.button_send_answer = new System.Windows.Forms.Button();
+            this.logs_debug = new System.Windows.Forms.RichTextBox();
             this.SuspendLayout();
             // 
             // textBox_name
@@ -157,11 +158,21 @@
             this.button_send_answer.UseVisualStyleBackColor = true;
             this.button_send_answer.Click += new System.EventHandler(this.button_send_answer_Click);
             // 
+            // logs_debug
+            // 
+            this.logs_debug.Location = new System.Drawing.Point(783, 62);
+            this.logs_debug.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.logs_debug.Name = "logs_debug";
+            this.logs_debug.Size = new System.Drawing.Size(352, 326);
+            this.logs_debug.TabIndex = 20;
+            this.logs_debug.Text = "";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(1221, 450);
+            this.Controls.Add(this.logs_debug);
             this.Controls.Add(this.button_send_answer);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.textBox_answer);
@@ -196,6 +207,7 @@
         private System.Windows.Forms.TextBox textBox_answer;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button button_send_answer;
+        private System.Windows.Forms.RichTextBox logs_debug;
     }
 }
 
