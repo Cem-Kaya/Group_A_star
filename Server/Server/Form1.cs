@@ -23,10 +23,12 @@ namespace Server
 		bool listening = false;
 		uint max_num_of_clients = 2;
 		uint num_of_players = 0;
-		
-		
+        Dictionary<Socket,uint> player_scores = new Dictionary<Socket, uint>();
 
-		public Form1()
+
+
+
+        public Form1()
 		{
 			Control.CheckForIllegalCrossThreadCalls = false;
 			this.FormClosing += new FormClosingEventHandler(Form1_FormClosing);
@@ -117,7 +119,6 @@ namespace Server
 					string incomingMessage = Encoding.Default.GetString(buffer);
 					incomingMessage = incomingMessage.Substring(0, incomingMessage.IndexOf("\0"));
 					logs.AppendText("Client "+ name + " : " + incomingMessage + "\n");
-					
 
 					int clients_ans;
 					if (Int32.TryParse(incomingMessage, out clients_ans))
@@ -220,6 +221,18 @@ namespace Server
 				sem.WaitOne();
 				sem.WaitOne();
 
+                
+				foreach(string client_name in client_names)
+				{
+					int answer;
+					if(Int32.TryParse(lines[(2 * q) % (lines.Length / 2) + 1], out answer))
+					{
+						int client_answer = ans[client_name];
+						int difference = Math.Abs(answer - client_answer); 					
+						
+					}
+
+				}
 
 				question_num--;
 				q++;
