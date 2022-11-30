@@ -24,7 +24,8 @@ namespace Server
 		uint max_num_of_clients = 2;
 		uint num_of_players = 0;
 
-		Socket server_socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+		Socket server_socket = new Socket(AddressFamily.Unknown, SocketType.Seqpacket, ProtocolType.Tcp);
+
 		List<Socket> client_sockets = new List<Socket>();
 		List<String> client_names = new List<String>();
 		
@@ -33,6 +34,7 @@ namespace Server
 
 		Dictionary<String, float> player_scores = new Dictionary<String, float>();
 		Dictionary<String, int> ans = new Dictionary<String, int>();
+		Dictionary<Socket, String> socket_to_name = new Dictionary<Socket, String>();
 
 		public Form1()
 		{
@@ -82,6 +84,7 @@ namespace Server
 						{
 							newClient.Send(name_statu);
 							client_names.Add(this_threads_name);
+							socket_to_name[newClient] = this_threads_name;
 							logs.AppendText("Client with name " + this_threads_name + " is connected!\n");
 							num_of_players++;
 							
@@ -139,14 +142,18 @@ namespace Server
 				}
 				catch
 				{
+					// One user terminated, other user should win the game
 					if (!terminating)
 					{
 						logs.AppendText("A client "+ name + " has disconnected\n");
 						num_of_players--;
 
 					}
+
 					thisClient.Close();
-					client_sockets.Remove(thisClient);
+					//client_sockets.Remove(thisClient);
+					//client_names.Remove(name);
+					//broadcast("User");		
 					connected = false;
 				}
 			}
@@ -194,6 +201,7 @@ namespace Server
 			String[] lines = File.ReadAllLines(textFile);
 			return lines;
 		}
+
 		public void broadcast (string msg)
 		{
 			debug_logs.AppendText("broadcasting: " + msg + "\n");
@@ -230,6 +238,22 @@ namespace Server
 			//broadcasting questions to the users
 			while (question_num > 0)
 			{
+				bool some_one_disconnected = false;
+				String disconnected_players_name = "";
+				foreach (var cl in client_sockets)
+				{
+					if (!cl.Connected)
+					{
+						some_one_disconnected = true;
+						disconnected_players_name = socket_to_name[cl];
+					}
+				}
+				if (some_one_disconnected)
+				{
+					broadcast("DCPLY" + disconnected_players_name + " has disconnected you win the game !");
+					player_scores[disconnected_players_name] = 0.0f;
+					break;
+				}  
 				String this_question = lines[(2 * q) % (lines.Length )];
 				//debug_logs.AppendText("lines.Length :" + lines.Length  + "(2 * q) % (lines.Length ) =  " + (2 * q) % (lines.Length ) );
 				this_question = "QUEST" + this_question + "\n";
@@ -317,6 +341,7 @@ namespace Server
 
 			client_sockets = new List<Socket>();
 			client_names = new List<String>();
+			
 
 			first_sem = new Semaphore(0, 3); //  for step one 3 is known 
 			sem = new Semaphore(0, 2); // 2 is the number of players 
@@ -324,6 +349,7 @@ namespace Server
 			
 			player_scores = new Dictionary<String, float>();
 			ans = new Dictionary<String, int>();
+			socket_to_name = new Dictionary<Socket, String>();
 
 			Thread game_loop_thread = new Thread(game_loop);
 			game_loop_thread.Start();
