@@ -141,7 +141,7 @@ namespace Server
 				{
 					if (!terminating)
 					{
-						logs.AppendText("A client has disconnected\n");
+						logs.AppendText("A client "+ name + " has disconnected\n");
 						num_of_players--;
 
 					}
@@ -226,10 +226,12 @@ namespace Server
 			{
 				player_scores[pl] = 0.0f;
 			}
-			//boradcasting questions to the users
+
+			//broadcasting questions to the users
 			while (question_num > 0)
 			{
-				String this_question = lines[(2 * q) % (lines.Length / 2)];
+				String this_question = lines[(2 * q) % (lines.Length )];
+				//debug_logs.AppendText("lines.Length :" + lines.Length  + "(2 * q) % (lines.Length ) =  " + (2 * q) % (lines.Length ) );
 				this_question = "QUEST" + this_question + "\n";
 				broadcast(this_question);
 				// Get the user answers
@@ -243,7 +245,7 @@ namespace Server
 				foreach (string client_name in client_names)
 				{
 					int answer;
-					if (Int32.TryParse(lines[(2 * q) % (lines.Length / 2) + 1], out answer))
+					if (Int32.TryParse(lines[(2 * q) % (lines.Length) + 1], out answer))
 					{
 						int client_answer = ans[client_name];
 						int difference = Math.Abs(answer - client_answer);
@@ -267,7 +269,7 @@ namespace Server
 				}
 				
 				// Concatenate the player name with their answer and broadcast it to the each client
-				String answare_info = "Answers: real : "+ lines[(2 * q) % (lines.Length / 2) + 1 ] + "\n";
+				String answare_info = "Answers: real : "+ lines[(2 * q) % (lines.Length) + 1 ] + "\n";
 				foreach(var pl in client_names)
 				{
 					answare_info += pl + " : " + ans[pl] + " ";
@@ -323,6 +325,8 @@ namespace Server
 			player_scores = new Dictionary<String, float>();
 			ans = new Dictionary<String, int>();
 
+			Thread game_loop_thread = new Thread(game_loop);
+			game_loop_thread.Start();
 		}
 
 		private void Set_question_number_Click(object sender, EventArgs e)
