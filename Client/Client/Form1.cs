@@ -32,7 +32,7 @@ namespace Client
 		}
 		private void connectButton_Click(object sender, EventArgs e)
 		{
-			m_ClientSocket = new Socket(AddressFamily.NetBios, SocketType.Seqpacket, ProtocolType.Tcp);
+			m_ClientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 			string IpAddress = IPValue.Text;
 			string client_name;
 			int portNum;
@@ -121,21 +121,44 @@ namespace Client
 						String answer_table = incoming_message;
 						logs.AppendText("\n" + answer_table + "\n");
 					}
+					//if game is over, a player disconnects or it is a tie, the sockets should be closed
 					if (type == "GMOVR")
 					{
 						button_send_answer.Enabled = false;
 						String winner = incoming_message;
 						logs.AppendText("\n" + winner + "\n");
+						//m_ClientSocket.Close();
+						//m_Connected = false;
+						//logs.AppendText("Should be disconnecting now \n");
+						//connectButton.Enabled = true;
+						//button_disconnect.Enabled = false;
 					}
-                    if (type == "DCPLY")
-                    {
-                        button_send_answer.Enabled = false;
-                        String dc_message = incoming_message;
-                        logs.AppendText("\n" + dc_message + "\n");
-                    }
-                }
+					if (type == "DCPLY")
+					{
+						button_send_answer.Enabled = false;
+						String dc_message = incoming_message;
+						logs.AppendText("\n" + dc_message + "\n");
+						//m_ClientSocket.Close();
+						//m_Connected = false;
+						//logs.AppendText("Should be disconnecting now \n");
+						//connectButton.Enabled = true;
+						//button_disconnect.Enabled = false;
+					}
+					if (type == "TIEGO")
+					{
+						button_send_answer.Enabled = false;
+						String tie_message = incoming_message;
+						logs.AppendText("\n" + tie_message + "\n");
+						//m_ClientSocket.Close();
+						//m_Connected = false;
+						//logs.AppendText("Should be disconnecting now \n");
+						//connectButton.Enabled = true;
+						//button_disconnect.Enabled = false;
+					}
+				}
 				catch
 				{
+					//in case the client can't receive anything from the server, ie the server disconnects abruptly
 					button_disconnect.Enabled = false;
 					try
 					{
