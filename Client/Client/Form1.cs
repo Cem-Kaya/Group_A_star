@@ -32,7 +32,7 @@ namespace Client
 		}
 		private void connectButton_Click(object sender, EventArgs e)
 		{
-			m_ClientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+			m_ClientSocket = new Socket(AddressFamily.NetBios, SocketType.Seqpacket, ProtocolType.Tcp);
 			string IpAddress = IPValue.Text;
 			string client_name;
 			int portNum;
@@ -127,7 +127,13 @@ namespace Client
 						String winner = incoming_message;
 						logs.AppendText("\n" + winner + "\n");
 					}
-				}
+                    if (type == "DCPLY")
+                    {
+                        button_send_answer.Enabled = false;
+                        String dc_message = incoming_message;
+                        logs.AppendText("\n" + dc_message + "\n");
+                    }
+                }
 				catch
 				{
 					button_disconnect.Enabled = false;
