@@ -36,6 +36,7 @@
 			this.number_of_questions = new System.Windows.Forms.TextBox();
 			this.Set_question_number = new System.Windows.Forms.Button();
 			this.debug_logs = new System.Windows.Forms.RichTextBox();
+			this.label3 = new System.Windows.Forms.Label();
 			this.SuspendLayout();
 			// 
 			// label1
@@ -112,12 +113,22 @@
 			this.debug_logs.Text = "";
 			this.debug_logs.TextChanged += new System.EventHandler(this.debug_logs_TextChanged);
 			// 
+			// label3
+			// 
+			this.label3.AutoSize = true;
+			this.label3.Location = new System.Drawing.Point(583, 110);
+			this.label3.Name = "label3";
+			this.label3.Size = new System.Drawing.Size(40, 13);
+			this.label3.TabIndex = 8;
+			this.label3.Text = "debug ";
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.SystemColors.WindowFrame;
 			this.ClientSize = new System.Drawing.Size(1019, 566);
+			this.Controls.Add(this.label3);
 			this.Controls.Add(this.debug_logs);
 			this.Controls.Add(this.Set_question_number);
 			this.Controls.Add(this.number_of_questions);
@@ -144,6 +155,7 @@
 		private System.Windows.Forms.TextBox number_of_questions;
 		private System.Windows.Forms.Button Set_question_number;
 		private System.Windows.Forms.RichTextBox debug_logs;
+		private System.Windows.Forms.Label label3;
 	}
 }
 

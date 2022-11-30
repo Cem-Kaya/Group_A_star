@@ -151,7 +151,13 @@ namespace Server
 						num_of_players--;
 					}
 					ans[name] = -1;
-					thisClient.Close();
+					try
+					{
+						thisClient.Close();
+					}catch
+					{
+
+					}
 					//client_sockets.Remove(thisClient);
 					//client_names.Remove(name);
 					//broadcast("User");		
@@ -245,6 +251,16 @@ namespace Server
 			//broadcasting questions to the users
 			while (question_num > 0)
 			{
+				
+				String this_question = lines[(2 * q) % (lines.Length )];
+				//debug_logs.AppendText("lines.Length :" + lines.Length  + "(2 * q) % (lines.Length ) =  " + (2 * q) % (lines.Length ) );
+				this_question = "QUEST" + this_question + "\n";
+				broadcast(this_question);
+				// Get the user answers
+				// Wait for all the player threads
+				sem.WaitOne();
+				sem.WaitOne();
+				
 				bool some_one_disconnected = false;
 				String disconnected_players_name = "";
 				foreach (var cl in client_sockets)
@@ -260,15 +276,7 @@ namespace Server
 					broadcast("DCPLY" + disconnected_players_name + " has disconnected you win the game !");
 					player_scores[disconnected_players_name] = 0.0f;
 					break;
-				}  
-				String this_question = lines[(2 * q) % (lines.Length )];
-				//debug_logs.AppendText("lines.Length :" + lines.Length  + "(2 * q) % (lines.Length ) =  " + (2 * q) % (lines.Length ) );
-				this_question = "QUEST" + this_question + "\n";
-				broadcast(this_question);
-				// Get the user answers
-				// Wait for all the player threads
-				sem.WaitOne();
-				sem.WaitOne();
+				}
 
 				Dictionary<string, int> name_dif = new Dictionary<string, int>();
 
@@ -349,7 +357,6 @@ namespace Server
 
 		private void clean_after_game()
 		{
-
 			foreach (Socket cl in client_sockets)
 			{
 				cl.Close();
@@ -359,8 +366,6 @@ namespace Server
 			{
 				t.Join();
 			}
-			
-			
 			
 			terminating = false;
 			//listening = false;
