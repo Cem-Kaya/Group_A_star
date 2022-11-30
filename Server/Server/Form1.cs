@@ -24,7 +24,7 @@ namespace Server
 		uint max_num_of_clients = 2;
 		uint num_of_players = 0;
 
-		Socket server_socket = new Socket(AddressFamily.Unknown, SocketType.Seqpacket, ProtocolType.Tcp);
+		Socket server_socket = new Socket(AddressFamily.InterNetwork , SocketType.Stream , ProtocolType.Tcp );
 
 		List<Socket> client_sockets = new List<Socket>();
 		List<String> client_names = new List<String>();
@@ -35,7 +35,7 @@ namespace Server
 		Dictionary<String, float> player_scores = new Dictionary<String, float>();
 		Dictionary<String, int> ans = new Dictionary<String, int>();
 		Dictionary<Socket, String> socket_to_name = new Dictionary<Socket, String>();
-
+		List<Thread> current_threads = new List<Thread>();
 		public Form1()
 		{
 			Control.CheckForIllegalCrossThreadCalls = false;
@@ -89,8 +89,9 @@ namespace Server
 							num_of_players++;
 							
 							Thread receiveThread = new Thread(() => Receive(newClient, this_threads_name)); // updated
-							first_sem.Release();// #UP
+							first_sem.Release();// #UP							
 							receiveThread.Start();
+							current_threads.Add(receiveThread);
 						}
 						catch
 						{
@@ -124,10 +125,10 @@ namespace Server
 				{
 					Byte[] buffer = new Byte[64];
 					thisClient.Receive(buffer);
-					
+
 					string incomingMessage = Encoding.Default.GetString(buffer);
 					incomingMessage = incomingMessage.Substring(0, incomingMessage.IndexOf("\0"));
-					logs.AppendText("Client "+ name + " : " + incomingMessage + "\n");
+					logs.AppendText("Client " + name + " : " + incomingMessage + "\n");
 
 					int clients_ans;
 					if (Int32.TryParse(incomingMessage, out clients_ans))
@@ -138,23 +139,28 @@ namespace Server
 					{
 						logs.AppendText(" something went very wrong number should have been send from client \n");
 					}
-					sem.Release();// #UP
+					
 				}
 				catch
 				{
+					connected = false;
 					// One user terminated, other user should win the game
 					if (!terminating)
 					{
-						logs.AppendText("A client "+ name + " has disconnected\n");
+						logs.AppendText("A client " + name + " has disconnected\n");
 						num_of_players--;
-
 					}
-
+					ans[name] = -1;
 					thisClient.Close();
 					//client_sockets.Remove(thisClient);
 					//client_names.Remove(name);
 					//broadcast("User");		
-					connected = false;
+
+				}
+				finally
+				{
+					sem.Release(); // #UP
+					//sem.Release(); // #UP
 				}
 			}
 		}
@@ -230,6 +236,7 @@ namespace Server
 
 			logs.AppendText("got past the lock the game shall start now !\n");
 			int q = 0;
+
 			foreach(var pl in client_names)
 			{
 				player_scores[pl] = 0.0f;
@@ -274,8 +281,6 @@ namespace Server
 						int client_answer = ans[client_name];
 						int difference = Math.Abs(answer - client_answer);
 						name_dif[client_name] = difference;
-
-
 					}
 				}
 
@@ -317,21 +322,46 @@ namespace Server
 			}
 			
 			var sortedDict2 = from entry in player_scores orderby entry.Value descending select entry;
-			String end_of_game = "The game has ended !" + "\n " + "The winner is " + sortedDict2.First().Key + " with a score of " + sortedDict2.First().Value + "\n";
+			float max_scores = sortedDict2.First().Value;
+			var winner_keys = sortedDict2.Where(x => x.Value == max_scores).Select(x => x.Key);
 
-			broadcast("GMOVR" + end_of_game + "\n");
-			
+			String end_of_game = "The game has ended !" + "\n "; 
+
+			if (winner_keys.Count() > 1)
+			{
+				end_of_game += "It is a tie!\n";
+				end_of_game += "";
+				foreach(String winner in winner_keys)
+				{
+					end_of_game += winner + " with a score of " + sortedDict2.First().Value + "\n";
+				}
+				broadcast("TIEGO" + end_of_game + "\n");
+			}
+			else
+			{
+				end_of_game += "The winner is " + sortedDict2.First().Key + " with a score of " + sortedDict2.First().Value + "\n";
+				broadcast("GMOVR" + end_of_game + "\n");
+			}
+
 			Thread.Sleep(1000);
-			
 			clean_after_game();
 		}
 
 		private void clean_after_game()
 		{
+
 			foreach (Socket cl in client_sockets)
 			{
 				cl.Close();
 			}
+			
+			foreach (Thread t in current_threads)
+			{
+				t.Join();
+			}
+			
+			
+			
 			terminating = false;
 			//listening = false;
 			question = false;
@@ -341,7 +371,6 @@ namespace Server
 
 			client_sockets = new List<Socket>();
 			client_names = new List<String>();
-			
 
 			first_sem = new Semaphore(0, 3); //  for step one 3 is known 
 			sem = new Semaphore(0, 2); // 2 is the number of players 

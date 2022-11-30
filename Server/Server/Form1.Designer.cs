@@ -61,7 +61,7 @@
 			// 
 			this.logs.Location = new System.Drawing.Point(60, 129);
 			this.logs.Name = "logs";
-			this.logs.Size = new System.Drawing.Size(374, 193);
+			this.logs.Size = new System.Drawing.Size(473, 425);
 			this.logs.TabIndex = 2;
 			this.logs.Text = "";
 			this.logs.TextChanged += new System.EventHandler(this.richTextBox1_TextChanged);
@@ -91,7 +91,7 @@
 			this.number_of_questions.Name = "number_of_questions";
 			this.number_of_questions.Size = new System.Drawing.Size(100, 20);
 			this.number_of_questions.TabIndex = 5;
-			this.number_of_questions.Text = "3";
+			this.number_of_questions.Text = "1";
 			// 
 			// Set_question_number
 			// 
@@ -105,9 +105,9 @@
 			// 
 			// debug_logs
 			// 
-			this.debug_logs.Location = new System.Drawing.Point(477, 129);
+			this.debug_logs.Location = new System.Drawing.Point(583, 129);
 			this.debug_logs.Name = "debug_logs";
-			this.debug_logs.Size = new System.Drawing.Size(338, 295);
+			this.debug_logs.Size = new System.Drawing.Size(410, 425);
 			this.debug_logs.TabIndex = 7;
 			this.debug_logs.Text = "";
 			this.debug_logs.TextChanged += new System.EventHandler(this.debug_logs_TextChanged);
@@ -116,7 +116,8 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(827, 449);
+			this.BackColor = System.Drawing.SystemColors.WindowFrame;
+			this.ClientSize = new System.Drawing.Size(1019, 566);
 			this.Controls.Add(this.debug_logs);
 			this.Controls.Add(this.Set_question_number);
 			this.Controls.Add(this.number_of_questions);
