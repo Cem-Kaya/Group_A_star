@@ -194,7 +194,25 @@ namespace Server
 			String[] lines = File.ReadAllLines(textFile);
 			return lines;
 		}
-
+		public void broadcast (string msg)
+		{
+			debug_logs.AppendText("broadcasting: " + msg + "\n");
+			foreach (Socket cl in client_sockets)
+			{				
+				Byte[] question__ = Encoding.Default.GetBytes(msg);
+				try
+				{
+					cl.Send(question__);
+				}
+				catch
+				{
+					logs.AppendText("Could not send question \n");
+					// if client is disconnected, do stuff here 
+				}
+			}
+			
+			Thread.Sleep(400);
+		}
 
 		private void game_loop()
 		{
@@ -208,23 +226,12 @@ namespace Server
 			{
 				player_scores[pl] = 0.0f;
 			}
-			
+			//boradcasting questions to the users
 			while (question_num > 0)
 			{
-				foreach (Socket cl in client_sockets)
-				{
-					String this_question = lines[(2 * q) % (lines.Length / 2)];
-					Byte[] question__ = Encoding.Default.GetBytes("QUEST" + this_question + "\n");
-					try
-					{
-						cl.Send(question__);
-					}
-					catch
-					{
-						logs.AppendText("Could not send question \n");
-						// if client is disconnected, do stuff here 
-					}
-				}
+				String this_question = lines[(2 * q) % (lines.Length / 2)];
+				this_question = "QUEST" + this_question + "\n";
+				broadcast(this_question);
 				// Get the user answers
 				// Wait for all the player threads
 				sem.WaitOne();
@@ -232,6 +239,7 @@ namespace Server
 
 				Dictionary<string, int> name_dif = new Dictionary<string, int>();
 
+				//checking clients' answers and saving the real answer-client answer differences
 				foreach (string client_name in client_names)
 				{
 					int answer;
@@ -244,18 +252,21 @@ namespace Server
 
 					}
 				}
+
+				// Sort the difference dictionary to pull out the max score.
 				var sortedDict = from entry in name_dif orderby entry.Value ascending select entry;
-				//logs.AppendText("The winner is " + sortedDict.First().Key + " with a difference of " + sortedDict.First().Value + "\n");
 				int max_score = sortedDict.First().Value;
 				
 				// magic !
 				var keys = sortedDict.Where(x => x.Value == max_score).Select(x => x.Key);
 				
+				// Update the player scores
 				foreach(String Pl in keys)
 				{
-					player_scores[Pl] += 1/keys.Count();
+					player_scores[Pl] += 1.0f/keys.Count();
 				}
 				
+				// Concatenate the player name with their answer and broadcast it to the each client
 				String answare_info = "Answers: real : "+ lines[(2 * q) % (lines.Length / 2) + 1 ] + "\n";
 				foreach(var pl in client_names)
 				{
@@ -263,20 +274,9 @@ namespace Server
 				}
 				answare_info += "\n";
 
-
-				foreach (Socket cl in client_sockets)
-				{					
-					Byte[] question__ = Encoding.Default.GetBytes("ANSWE" + answare_info);
-					try
-					{
-						cl.Send(question__);
-					}
-					catch
-					{
-						logs.AppendText("Could not send question \n");
-						// if client is disconnected, do stuff here 
-					}
-				}
+				broadcast("ANSWE" + answare_info);
+				
+				// Concatenate the player with their associated score and broadcast it to the each client
 
 				String score_info = "Current scores: ";
 				foreach (var pl in client_names)
@@ -284,45 +284,17 @@ namespace Server
 					score_info += pl + " : " + player_scores[pl] + " ";
 				}
 				score_info += "\n";
-
-				foreach (Socket cl in client_sockets)
-				{
-					Byte[] question__ = Encoding.Default.GetBytes("SCORE" + score_info);
-					try
-					{
-						cl.Send(question__);
-					}
-					catch
-					{
-						logs.AppendText("Could not send question \n");
-						// if client is disconnected, do stuff here 
-					}
-				}
-
+				broadcast("SCORE" + score_info);
 
 				question_num--;
 				q++;
 			}
-
-
 			
 			var sortedDict2 = from entry in player_scores orderby entry.Value descending select entry;
 			String end_of_game = "The game has ended !" + "\n " + "The winner is " + sortedDict2.First().Key + " with a score of " + sortedDict2.First().Value + "\n";
+
+			broadcast("GMOVR" + end_of_game + "\n");
 			
-			foreach (Socket cl in client_sockets)
-			{				
-				Byte[] send_buff_ = Encoding.Default.GetBytes("GMOVR" + end_of_game + "\n");
-				try
-				{
-					cl.Send(send_buff_);
-				}
-				catch
-				{
-					logs.AppendText("Could not send end game data \n");
-					// if client is disconnected, do stuff here 
-				}
-				
-			}
 			Thread.Sleep(1000);
 			foreach (Socket cl in client_sockets)
 			{
@@ -346,6 +318,11 @@ namespace Server
 			{
 				logs.AppendText("Please check question number \n");
 			}			
+		}
+
+		private void debug_logs_TextChanged(object sender, EventArgs e)
+		{
+
 		}
 	}
 }

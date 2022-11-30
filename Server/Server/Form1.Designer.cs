@@ -35,6 +35,7 @@
 			this.label2 = new System.Windows.Forms.Label();
 			this.number_of_questions = new System.Windows.Forms.TextBox();
 			this.Set_question_number = new System.Windows.Forms.Button();
+			this.debug_logs = new System.Windows.Forms.RichTextBox();
 			this.SuspendLayout();
 			// 
 			// label1
@@ -102,11 +103,21 @@
 			this.Set_question_number.UseVisualStyleBackColor = true;
 			this.Set_question_number.Click += new System.EventHandler(this.Set_question_number_Click);
 			// 
+			// debug_logs
+			// 
+			this.debug_logs.Location = new System.Drawing.Point(477, 129);
+			this.debug_logs.Name = "debug_logs";
+			this.debug_logs.Size = new System.Drawing.Size(338, 295);
+			this.debug_logs.TabIndex = 7;
+			this.debug_logs.Text = "";
+			this.debug_logs.TextChanged += new System.EventHandler(this.debug_logs_TextChanged);
+			// 
 			// Form1
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(600, 449);
+			this.ClientSize = new System.Drawing.Size(827, 449);
+			this.Controls.Add(this.debug_logs);
 			this.Controls.Add(this.Set_question_number);
 			this.Controls.Add(this.number_of_questions);
 			this.Controls.Add(this.label2);
@@ -131,6 +142,7 @@
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.TextBox number_of_questions;
 		private System.Windows.Forms.Button Set_question_number;
+		private System.Windows.Forms.RichTextBox debug_logs;
 	}
 }
 
