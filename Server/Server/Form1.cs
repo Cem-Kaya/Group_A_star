@@ -296,10 +296,32 @@ namespace Server
 			broadcast("GMOVR" + end_of_game + "\n");
 			
 			Thread.Sleep(1000);
+			
+			clean_after_game();
+		}
+
+		private void clean_after_game()
+		{
 			foreach (Socket cl in client_sockets)
 			{
 				cl.Close();
 			}
+			terminating = false;
+			//listening = false;
+			question = false;
+			
+			max_num_of_clients = 2;
+			num_of_players = 0;
+
+			client_sockets = new List<Socket>();
+			client_names = new List<String>();
+
+			first_sem = new Semaphore(0, 3); //  for step one 3 is known 
+			sem = new Semaphore(0, 2); // 2 is the number of players 
+			Set_question_number.Enabled = true;
+			
+			player_scores = new Dictionary<String, float>();
+			ans = new Dictionary<String, int>();
 
 		}
 
