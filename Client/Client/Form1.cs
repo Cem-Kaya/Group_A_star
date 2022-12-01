@@ -32,6 +32,7 @@ namespace Client
 		}
 		private void connectButton_Click(object sender, EventArgs e)
 		{
+            //connecting
 			m_ClientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 			string IpAddress = IPValue.Text;
 			string client_name;
@@ -54,7 +55,7 @@ namespace Client
 
 					Byte[] buffer2 = new Byte[64];
 					m_ClientSocket.Receive(buffer2);
-					logs_debug.AppendText("whyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
+					//logs_debug.AppendText("whyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
 					string incomingMessage = Encoding.Default.GetString(buffer2);
 					incomingMessage = incomingMessage.Substring(0, incomingMessage.IndexOf("\0"));
 					//debug
@@ -98,24 +99,30 @@ namespace Client
 					//debug                        incoming_message
 					logs_debug.AppendText("\n\n" + incoming_message);
 
+                    //first 5 characters of the incoming message represent the message type
+                    //for instance if it starts with QUEST it means the rest of the mssage will be
+                    //a question
 					String type = incoming_message.Substring(0, 5);
 					incoming_message = incoming_message.Substring(5, incoming_message.IndexOf("\0")-5);
 					//logs.AppendText("CHECKING QUEST ERROR  " + incoming_message + "\n");
 					logs_debug.AppendText("\n type :::: " + type + "\n");
 
+                    //if the server sent a question
 					if (type == "QUEST")
 					{
 						button_send_answer.Enabled = true;
 						String question_line = incoming_message;
 						logs.AppendText("Server Asks: " + question_line + "\n");
 					}
-					if (type == "SCORE")
+                    //if the server sent the scores for the current question
+                    if (type == "SCORE")
 					{
 						button_send_answer.Enabled = true;
 						String score_table = incoming_message;
 						logs.AppendText("\n"+score_table +"\n");
 					}
-					if (type == "ANSWE")
+                    //if the server sends the answer for the current question
+                    if (type == "ANSWE")
 					{
 						button_send_answer.Enabled = true;
 						String answer_table = incoming_message;
@@ -133,6 +140,7 @@ namespace Client
 						//connectButton.Enabled = true;
 						//button_disconnect.Enabled = false;
 					}
+                    //if a player disconnects in the middle of the game
 					if (type == "DCPLY")
 					{
 						button_send_answer.Enabled = false;
@@ -144,6 +152,7 @@ namespace Client
 						//connectButton.Enabled = true;
 						//button_disconnect.Enabled = false;
 					}
+                    //if the game is a tie and server lets us now
 					if (type == "TIEGO")
 					{
 						button_send_answer.Enabled = false;
@@ -170,7 +179,9 @@ namespace Client
 					logs.AppendText("Should be disconnecting now \n");
 					
 					connectButton.Enabled = true;
-				}
+                    button_disconnect.Enabled = false;
+					button_send_answer.Enabled = false;
+                }
 			}
 						
 		}

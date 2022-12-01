@@ -87,7 +87,7 @@
             this.IPValue.Name = "IPValue";
             this.IPValue.Size = new System.Drawing.Size(127, 22);
             this.IPValue.TabIndex = 11;
-            this.IPValue.Text = "172.22.156.89";
+            this.IPValue.Text = "172.22.169.87";
             this.IPValue.TextChanged += new System.EventHandler(this.IPValue_TextChanged);
             // 
             // logs
