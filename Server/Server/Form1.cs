@@ -16,6 +16,8 @@ namespace Server
 {
 	public partial class Form1 : Form
 	{
+
+		// variables used for hte project 
 		String[] lines;
 		bool terminating = false;
 		bool listening = false;
@@ -36,6 +38,7 @@ namespace Server
 		Dictionary<String, int> ans = new Dictionary<String, int>();
 		Dictionary<Socket, String> socket_to_name = new Dictionary<Socket, String>();
 		List<Thread> current_threads = new List<Thread>();
+		
 		public Form1()
 		{
 			Control.CheckForIllegalCrossThreadCalls = false;
@@ -44,7 +47,7 @@ namespace Server
 			Thread game_loop_thread = new Thread(game_loop);
 			game_loop_thread.Start();
 		}
-
+		// listen for the incoming connections
 		private void Accept()
 		{
 			while (listening)
@@ -57,11 +60,30 @@ namespace Server
 					Byte[] buffer = new Byte[64];
 					string this_threads_name;
 					newClient.Receive(buffer);
-
+					// block untill new connection 
 					this_threads_name = Encoding.Default.GetString(buffer);
 					this_threads_name = this_threads_name.Substring(0, this_threads_name.IndexOf("\0"));
 					//check if a client with the same name is connected
-					if (client_names.Contains(this_threads_name))
+					if(client_names.Count() >= 2)
+					{
+						Byte[] players_statu = Encoding.Default.GetBytes("There are already two players in the game!");
+						try
+						{
+							newClient.Send(players_statu);
+						}
+						catch
+						{
+							logs.AppendText("There is a problem! Check the connection...\n");
+							// if client is disconnected, do stuff here 
+						}
+                        client_sockets.Remove(newClient);
+                        newClient.Close();
+                        
+
+                        logs.AppendText("A client with the name: " + this_threads_name + " tried to join while the game was running.\n");
+					}
+					//if a client with the same name tries to connect
+					else if (client_names.Contains(this_threads_name))
 					{
 						Byte[] name_statu = Encoding.Default.GetBytes("this name is taken!");
 						try
@@ -77,6 +99,7 @@ namespace Server
 						newClient.Close();
 						logs.AppendText("Existing clients name: " + this_threads_name + " there was already someone with this name, so the new client was disconnected.\n");
 					}
+					//client successfully connects
 					else
 					{
 						Byte[] name_statu = Encoding.Default.GetBytes("this name is not taken !");
@@ -87,7 +110,7 @@ namespace Server
 							socket_to_name[newClient] = this_threads_name;
 							logs.AppendText("Client with name " + this_threads_name + " is connected!\n");
 							num_of_players++;
-							
+							//start thread 
 							Thread receiveThread = new Thread(() => Receive(newClient, this_threads_name)); // updated
 							first_sem.Release();// #UP							
 							receiveThread.Start();
@@ -118,14 +141,14 @@ namespace Server
 		private void Receive(Socket thisClient , String name ) // updated
 		{
 			bool connected = true;
-			
+			// syncronized with hte game loop by the use of semaphores 
 			while (connected && !terminating)
 			{
 				try
 				{
 					Byte[] buffer = new Byte[64];
 					thisClient.Receive(buffer);
-
+					// block untill recive 
 					string incomingMessage = Encoding.Default.GetString(buffer);
 					incomingMessage = incomingMessage.Substring(0, incomingMessage.IndexOf("\0"));
 					logs.AppendText("Client " + name + " : " + incomingMessage + "\n");
@@ -137,7 +160,7 @@ namespace Server
 					}
 					else
 					{
-						logs.AppendText(" something went very wrong number should have been send from client \n");
+						logs.AppendText("something went very wrong number should have been send from client \n");
 					}
 					
 				}
@@ -165,6 +188,7 @@ namespace Server
 				}
 				finally
 				{
+					Thread.Sleep(250);
 					sem.Release(); // #UP
 					//sem.Release(); // #UP
 				}
@@ -174,6 +198,11 @@ namespace Server
 		private void Form1_FormClosing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
 			Environment.Exit(0);
+			foreach (Thread t in current_threads)
+			{
+				t.Abort();// kill all ch 
+			}
+
 		}
 		private void richTextBox1_TextChanged(object sender, EventArgs e)
 		{
@@ -186,6 +215,7 @@ namespace Server
 
 		private void launch_button_Click(object sender, EventArgs e)
 		{
+            //sets the launch parameters 
 			int serverPort;
 			
 			if (Int32.TryParse(port_box.Text, out serverPort)  )
@@ -210,10 +240,11 @@ namespace Server
 
 		private String[] readFile(String textFile)
 		{
+			//read the file 
 			String[] lines = File.ReadAllLines(textFile);
 			return lines;
 		}
-
+		// broadcast 
 		public void broadcast (string msg)
 		{
 			debug_logs.AppendText("broadcasting: " + msg + "\n");
@@ -230,11 +261,12 @@ namespace Server
 					// if client is disconnected, do stuff here 
 				}
 			}
-			
-			Thread.Sleep(400);
+			//sleep for msg to arive 
+			Thread.Sleep(700);
 		}
 
-		private void game_loop()
+        // game loop
+        private void game_loop()
 		{
 			first_sem.WaitOne();
 			first_sem.WaitOne();
@@ -245,7 +277,7 @@ namespace Server
 
 			foreach(var pl in client_names)
 			{
-				player_scores[pl] = 0.0f;
+				player_scores[pl] = 0.0f; // st the score to 0
 			}
 
 			//broadcasting questions to the users
@@ -265,6 +297,7 @@ namespace Server
 				String disconnected_players_name = "";
 				foreach (var cl in client_sockets)
 				{
+					debug_logs.AppendText("carsh : "+ client_sockets.Count());
 					if (!cl.Connected)
 					{
 						some_one_disconnected = true;
@@ -304,7 +337,16 @@ namespace Server
 				{
 					player_scores[Pl] += 1.0f/keys.Count();
 				}
-				
+				String tmp_round_winner;
+				if (keys.Count() == 1)
+				{
+					tmp_round_winner = keys.First() + " is the winner of the round ";
+				}
+				else
+				{
+					tmp_round_winner = "This round it is a tie.";
+
+				}
 				// Concatenate the player name with their answer and broadcast it to the each client
 				String answare_info = "Answers: real : "+ lines[(2 * q) % (lines.Length) + 1 ] + "\n";
 				foreach(var pl in client_names)
@@ -321,8 +363,9 @@ namespace Server
 				foreach (var pl in client_names)
 				{
 					score_info += pl + " : " + player_scores[pl] + " ";
+
 				}
-				score_info += "\n";
+				score_info += "\n" + tmp_round_winner + "\n";
 				broadcast("SCORE" + score_info);
 
 				question_num--;
