@@ -76,11 +76,11 @@ namespace Server
 							logs.AppendText("There is a problem! Check the connection...\n");
 							// if client is disconnected, do stuff here 
 						}
-                        client_sockets.Remove(newClient);
-                        newClient.Close();
-                        
+						client_sockets.Remove(newClient);
+						newClient.Close();
+						
 
-                        logs.AppendText("A client with the name: " + this_threads_name + " tried to join while the game was running.\n");
+						logs.AppendText("A client with the name: " + this_threads_name + " tried to join while the game was running.\n");
 					}
 					//if a client with the same name tries to connect
 					else if (client_names.Contains(this_threads_name))
@@ -215,7 +215,7 @@ namespace Server
 
 		private void launch_button_Click(object sender, EventArgs e)
 		{
-            //sets the launch parameters 
+			//sets the launch parameters 
 			int serverPort;
 			
 			if (Int32.TryParse(port_box.Text, out serverPort)  )
@@ -265,8 +265,8 @@ namespace Server
 			Thread.Sleep(700);
 		}
 
-        // game loop
-        private void game_loop()
+		// game loop
+		private void game_loop()
 		{
 			first_sem.WaitOne();
 			first_sem.WaitOne();
@@ -281,6 +281,7 @@ namespace Server
 			}
 
 			//broadcasting questions to the users
+			bool some_one_disconnected = false;
 			while (question_num > 0)
 			{
 				
@@ -293,7 +294,7 @@ namespace Server
 				sem.WaitOne();
 				sem.WaitOne();
 				
-				bool some_one_disconnected = false;
+				some_one_disconnected = false;
 				String disconnected_players_name = "";
 				foreach (var cl in client_sockets)
 				{
@@ -380,8 +381,11 @@ namespace Server
 
 			if (winner_keys.Count() > 1)
 			{
-				end_of_game += "It is a tie!\n";
-				end_of_game += "";
+				if (!some_one_disconnected) {
+					end_of_game += "It is a tie!\n";
+					end_of_game += "";
+				}
+				
 				foreach(String winner in winner_keys)
 				{
 					end_of_game += winner + " with a score of " + sortedDict2.First().Value + "\n";
@@ -400,6 +404,7 @@ namespace Server
 
 		private void clean_after_game()
 		{
+			num_of_players = 0;
 			foreach (Socket cl in client_sockets)
 			{
 				cl.Close();
