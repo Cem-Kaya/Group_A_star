@@ -95,8 +95,8 @@ namespace Server
 							logs.AppendText("There is a problem! Check the connection...\n");
 							// if client is disconnected, do stuff here 
 						}
-						
-						newClient.Close();
+                        client_sockets.Remove(newClient);
+                        newClient.Close();
 						logs.AppendText("Existing clients name: " + this_threads_name + " there was already someone with this name, so the new client was disconnected.\n");
 					}
 					//client successfully connects
