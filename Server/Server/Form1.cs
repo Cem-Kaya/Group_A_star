@@ -323,7 +323,18 @@ namespace Server
 						{
 							logs.AppendText("A client " + clientName + " has disconnected\n");
 							num_of_players--;
-						}
+                            //remove soc from client_sockets
+                            //client_sockets.Remove(soc);
+                            //remove clientName from client_names
+                            //client_names.Remove(clientName);
+                            //remove clientName from name_to_answer
+                            //name_to_answer.Remove(clientName);
+                            //remove soc from socket_to_name
+                            //socket_to_name.Remove(soc);
+                            //remove clientName from player_scores
+                            //player_scores.Remove(clientName);
+                            
+                        }
 						name_to_answer[clientName] = -1;
 						try
 						{
@@ -359,6 +370,7 @@ namespace Server
 				{
 					broadcast("DCPLY" + disconnected_players_name + " has disconnected you win the game !");
 					player_scores[disconnected_players_name] = 0.0f;
+					//if someone disconnect we wont break the loop unless there is only one person still playing
 					break;
 				}
 
@@ -388,7 +400,9 @@ namespace Server
 				{
 					player_scores[Pl] += 1.0f/keys.Count();
 				}
+
 				String tmp_round_winner;
+
 				if (keys.Count() == 1)
 				{
 					tmp_round_winner = keys.First() + " is the winner of the round ";
@@ -493,15 +507,24 @@ namespace Server
 		{			
 			if (Int32.TryParse(number_of_questions.Text, out question_num))
 			{
-				//reads all lines and stores all lines in string array
-				lines = readFile("questions.txt");
-				question = true;
-				Start_game.Enabled = false;
-				logs.AppendText("number of questions: " + question_num + "\n");
-				//first_sem.Release();//#UP
-				Thread game_loop_thread = new Thread(game_loop);
-				game_loop_thread.Start();
 
+				//first_sem.Release();//#UP
+				if(client_sockets.Count() < 2)
+				{
+					debug_logs.AppendText("Not enough players, there are currently " + client_sockets.Count() + " players \n");
+				}
+				else
+				{
+                    //reads all lines and stores all lines in string array
+                    lines = readFile("questions.txt");
+                    question = true;
+                    //Start_game.Enabled = false;
+                    logs.AppendText("number of questions: " + question_num + "\n");
+                    Thread game_loop_thread = new Thread(game_loop);
+					game_loop_thread.Start();
+                    Start_game.Enabled = false;
+                }
+                
 			}
 			else
 			{
