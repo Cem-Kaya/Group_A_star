@@ -31,11 +31,11 @@ namespace Server
 		List<Socket> client_sockets = new List<Socket>();
 		List<String> client_names = new List<String>();
 		
-		Semaphore first_sem = new Semaphore(0, 3); //  for step one 3 is known 
-		Semaphore sem = new Semaphore(0, 2); // 2 is the number of players 
+		// Semaphore first_sem = new // Semaphore(0, 3); //  for step one 3 is known 
+		// Semaphore sem = new // Semaphore(0, 2); // 2 is the number of players 
 
 		Dictionary<String, float> player_scores = new Dictionary<String, float>();
-		Dictionary<String, int> ans = new Dictionary<String, int>();
+		Dictionary<String, int> name_to_answer = new Dictionary<String, int>();
 		Dictionary<Socket, String> socket_to_name = new Dictionary<Socket, String>();
 		List<Thread> current_threads = new List<Thread>();
 		
@@ -44,8 +44,6 @@ namespace Server
 			Control.CheckForIllegalCrossThreadCalls = false;
 			this.FormClosing += new FormClosingEventHandler(Form1_FormClosing);
 			InitializeComponent();
-			Thread game_loop_thread = new Thread(game_loop);
-			game_loop_thread.Start();
 		}
 		// listen for the incoming connections
 		private void Accept()
@@ -95,8 +93,8 @@ namespace Server
 							logs.AppendText("There is a problem! Check the connection...\n");
 							// if client is disconnected, do stuff here 
 						}
-                        client_sockets.Remove(newClient);
-                        newClient.Close();
+						client_sockets.Remove(newClient);
+						newClient.Close();
 						logs.AppendText("Existing clients name: " + this_threads_name + " there was already someone with this name, so the new client was disconnected.\n");
 					}
 					//client successfully connects
@@ -108,19 +106,20 @@ namespace Server
 							newClient.Send(name_statu);
 							client_names.Add(this_threads_name);
 							socket_to_name[newClient] = this_threads_name;
+
 							logs.AppendText("Client with name " + this_threads_name + " is connected!\n");
 							num_of_players++;
+
 							//start thread 
-							Thread receiveThread = new Thread(() => Receive(newClient, this_threads_name)); // updated
-							first_sem.Release();// #UP							
-							receiveThread.Start();
-							current_threads.Add(receiveThread);
+							//Thread receiveThread = new Thread(() => Receive(newClient, this_threads_name)); // updated
+							//first_sem.Release();// #UP							
+							//receiveThread.Start();
+							//current_threads.Add(receiveThread);
 						}
 						catch
 						{
 							logs.AppendText("There is a problem! Check the connection...\n");
 							// if client is disconnected, do stuff here 
-
 						}
 					}
 				}
@@ -137,11 +136,11 @@ namespace Server
 				}
 			}
 		}
-
+		/*
 		private void Receive(Socket thisClient , String name ) // updated
 		{
 			bool connected = true;
-			// syncronized with hte game loop by the use of semaphores 
+			// syncronized with hte game loop by the use of // Semaphores 
 			while (connected && !terminating)
 			{
 				try
@@ -162,7 +161,6 @@ namespace Server
 					{
 						logs.AppendText("something went very wrong number should have been send from client \n");
 					}
-					
 				}
 				catch
 				{
@@ -194,15 +192,17 @@ namespace Server
 				}
 			}
 		}
-
+		*/
+		
 		private void Form1_FormClosing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
 			Environment.Exit(0);
+			/*
 			foreach (Thread t in current_threads)
 			{
 				t.Abort();// kill all ch 
 			}
-
+			*/
 		}
 		private void richTextBox1_TextChanged(object sender, EventArgs e)
 		{
@@ -229,7 +229,7 @@ namespace Server
 
 				Thread acceptThread = new Thread(Accept);
 				acceptThread.Start();
-
+				
 				logs.AppendText("Started listening on port: " + serverPort + "\n");
 			}
 			else
@@ -262,15 +262,15 @@ namespace Server
 				}
 			}
 			//sleep for msg to arive 
-			Thread.Sleep(700);
+			Thread.Sleep(1000);
 		}
 
 		// game loop
 		private void game_loop()
 		{
+			/*first_sem.WaitOne();
 			first_sem.WaitOne();
-			first_sem.WaitOne();
-			first_sem.WaitOne();
+			first_sem.WaitOne();*/
 
 			logs.AppendText("got past the lock the game shall start now !\n");
 			int q = 0;
@@ -282,18 +282,68 @@ namespace Server
 
 			//broadcasting questions to the users
 			bool some_one_disconnected = false;
+			int clientCounter = 0;
+
 			while (question_num > 0)
-			{
-				
+			{				
 				String this_question = lines[(2 * q) % (lines.Length )];
 				//debug_logs.AppendText("lines.Length :" + lines.Length  + "(2 * q) % (lines.Length ) =  " + (2 * q) % (lines.Length ) );
 				this_question = "QUEST" + this_question + "\n";
 				broadcast(this_question);
 				// Get the user answers
 				// Wait for all the player threads
-				sem.WaitOne();
-				sem.WaitOne();
-				
+				//sem.WaitOne();
+				//sem.WaitOne();
+				foreach (Socket soc in client_sockets){
+					string clientName = socket_to_name[soc];
+					try
+					{
+						Byte[] buffer = new Byte[64];
+						soc.Receive(buffer);
+						string incomingMessage = Encoding.Default.GetString(buffer);
+						incomingMessage = incomingMessage.Substring(0, incomingMessage.IndexOf("\0"));
+						clientCounter++;
+
+						logs.AppendText("Client " + clientName + " : " + incomingMessage + "\n");
+
+						int clients_ans;
+						if (Int32.TryParse(incomingMessage, out clients_ans))
+						{
+							name_to_answer[clientName] = clients_ans;
+						}
+						else
+						{
+							logs.AppendText("something went very wrong number should have been send from client \n");
+						}
+					}
+					catch
+					{
+						// One user terminated, other user should win the game
+						if (!terminating)
+						{
+							logs.AppendText("A client " + clientName + " has disconnected\n");
+							num_of_players--;
+						}
+						name_to_answer[clientName] = -1;
+						try
+						{
+							soc.Close();
+						}
+						catch
+						{
+
+						}
+						//client_sockets.Remove(thisClient);
+						//client_names.Remove(name);
+						//broadcast("User");		
+
+					}
+					finally
+					{
+						Thread.Sleep(250);
+					}
+				}
+
 				some_one_disconnected = false;
 				String disconnected_players_name = "";
 				foreach (var cl in client_sockets)
@@ -320,7 +370,7 @@ namespace Server
 					int answer;
 					if (Int32.TryParse(lines[(2 * q) % (lines.Length) + 1], out answer))
 					{
-						int client_answer = ans[client_name];
+						int client_answer = name_to_answer [client_name];
 						int difference = Math.Abs(answer - client_answer);
 						name_dif[client_name] = difference;
 					}
@@ -352,7 +402,7 @@ namespace Server
 				String answare_info = "Answers: real : "+ lines[(2 * q) % (lines.Length) + 1 ] + "\n";
 				foreach(var pl in client_names)
 				{
-					answare_info += pl + " : " + ans[pl] + " ";
+					answare_info += pl + " : " + name_to_answer[pl] + " ";
 				}
 				answare_info += "\n";
 
@@ -405,36 +455,38 @@ namespace Server
 		private void clean_after_game()
 		{
 			num_of_players = 0;
+			/*
 			foreach (Socket cl in client_sockets)
 			{
 				cl.Close();
 			}
 			
+			
 			foreach (Thread t in current_threads)
 			{
 				t.Join();
 			}
-			
+			*/
 			terminating = false;
 			//listening = false;
 			question = false;
 			
-			max_num_of_clients = 2;
+			//max_num_of_clients = 2;
 			num_of_players = 0;
 
 			client_sockets = new List<Socket>();
 			client_names = new List<String>();
 
-			first_sem = new Semaphore(0, 3); //  for step one 3 is known 
-			sem = new Semaphore(0, 2); // 2 is the number of players 
-			Set_question_number.Enabled = true;
+			// first_sem = new // Semaphore(0, 3); //  for step one 3 is known 
+			// sem = new // Semaphore(0, 2); // 2 is the number of players 
+			Start_game.Enabled = true;
 			
 			player_scores = new Dictionary<String, float>();
-			ans = new Dictionary<String, int>();
+			name_to_answer = new Dictionary<String, int>();
 			socket_to_name = new Dictionary<Socket, String>();
 
-			Thread game_loop_thread = new Thread(game_loop);
-			game_loop_thread.Start();
+			//Thread game_loop_thread = new Thread(game_loop);
+			//game_loop_thread.Start();
 		}
 
 		private void Set_question_number_Click(object sender, EventArgs e)
@@ -444,9 +496,12 @@ namespace Server
 				//reads all lines and stores all lines in string array
 				lines = readFile("questions.txt");
 				question = true;
-				Set_question_number.Enabled = false;
+				Start_game.Enabled = false;
 				logs.AppendText("number of questions: " + question_num + "\n");
-				first_sem.Release();//#UP
+				//first_sem.Release();//#UP
+				Thread game_loop_thread = new Thread(game_loop);
+				game_loop_thread.Start();
+
 			}
 			else
 			{
