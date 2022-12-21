@@ -102,30 +102,40 @@ namespace Client
                     //first 5 characters of the incoming message represent the message type
                     //for instance if it starts with QUEST it means the rest of the mssage will be
                     //a question
-					String type = incoming_message.Substring(0, 5);
-					incoming_message = incoming_message.Substring(5, incoming_message.IndexOf("\0")-5);
+                    String actor_type = incoming_message.Substring(0, 1);
+                    String type = incoming_message.Substring(1, 5);
+					incoming_message = incoming_message.Substring(6, incoming_message.IndexOf("\0")-5);
 					//logs.AppendText("CHECKING QUEST ERROR  " + incoming_message + "\n");
 					logs_debug.AppendText("\n type :::: " + type + "\n");
 
                     //if the server sent a question
 					if (type == "QUEST")
 					{
-						button_send_answer.Enabled = true;
+						if (actor_type == "P") {
+                            button_send_answer.Enabled = true;
+                        }
+
 						String question_line = incoming_message;
 						logs.AppendText("Server Asks: " + question_line + "\n");
 					}
                     //if the server sent the scores for the current question
                     if (type == "SCORE")
 					{
-						button_send_answer.Enabled = true;
-						String score_table = incoming_message;
+                        if (actor_type == "P")
+                        {
+                            button_send_answer.Enabled = true;
+                        }
+                        String score_table = incoming_message;
 						logs.AppendText("\n"+score_table +"\n");
 					}
                     //if the server sends the answer for the current question
                     if (type == "ANSWE")
 					{
-						button_send_answer.Enabled = true;
-						String answer_table = incoming_message;
+                        if (actor_type == "P")
+                        {
+                            button_send_answer.Enabled = true;
+                        }
+                        String answer_table = incoming_message;
 						logs.AppendText("\n" + answer_table + "\n");
 					}
 					//if game is over, a player disconnects or it is a tie, the sockets should be closed
