@@ -82,6 +82,7 @@ namespace Client
 				catch
 				{
 					logs.AppendText("Failed to connect to the server due to non name related issues!\n");
+					connectButton.Enabled = true;
 				}
 			}
 		}
