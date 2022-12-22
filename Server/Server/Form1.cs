@@ -46,12 +46,14 @@ namespace Server
 		{
 			Control.CheckForIllegalCrossThreadCalls = false;
 			game_started = false;
+			Thread.CurrentThread.Name = "main";
 			this.FormClosing += new FormClosingEventHandler(Form1_FormClosing);
 			InitializeComponent();
 		}
 		// listen for the incoming connections
 		private void Accept()
 		{
+			
 			while (listening)
 			{
 				try
@@ -117,7 +119,9 @@ namespace Server
 							{
 								Thread check_thread = new Thread(() => check_user(newClient));
 								check_thread.Start();
+								check_thread.Name = "check_disconnect_thread";
 								gaming_client_names.Add(this_threads_name);
+								//second client
 								gaming_client_sockets.Add(newClient);
 								logs.AppendText("Client with name " + this_threads_name + " is connected as a player!\n");
 							}
@@ -286,6 +290,7 @@ namespace Server
 				launch_button.Enabled = false;
 
 				Thread acceptThread = new Thread(Accept);
+				acceptThread.Name = "Accept";
 				acceptThread.Start();
 
 
@@ -649,12 +654,13 @@ namespace Server
 
 			player_scores = new Dictionary<String, float>();
 			name_to_answer = new Dictionary<String, int>();
-			gaming_client_names = client_names;
-			gaming_client_sockets = client_sockets;
+			gaming_client_names = new List<String>(client_names);
+			gaming_client_sockets = new List<Socket>(client_sockets);
 
 			foreach (Socket sc in gaming_client_sockets)
 			{
 				Thread check_user_thread = new Thread(() => check_user(sc));
+				check_user_thread.Name = "check_user_thread";
 				check_user_thread.Start();
 			};
 			/*
@@ -703,6 +709,7 @@ namespace Server
 					logs.AppendText("number of questions: " + question_num + "\n");
 					game_started = true;
 					Thread game_loop_thread = new Thread(game_loop);
+					game_loop_thread.Name = "game_loop_thread";
 
 					game_loop_thread.Start();
 					Start_game.Enabled = false;
