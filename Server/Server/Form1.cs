@@ -185,7 +185,12 @@ namespace Server
 				if (!client.Connected)
 				{
 					debug_logs.AppendText("Client disconnected" + socket_to_name[client] + "status" + client.Connected + "\n");
-
+					//remove client from client_sockets, gaming_client_sockets, client_names, gaming_client_names
+					client_sockets.Remove(client);
+					gaming_client_sockets.Remove(client);
+					client_names.Remove(socket_to_name[client]);
+					gaming_client_names.Remove(socket_to_name[client]);
+					
 					Thread.Sleep(250);
 
 					break;
@@ -579,7 +584,7 @@ namespace Server
 
 				}
 
-				if (!is_a_tie)
+				if (!is_a_tie && gaming_client_names.Count() > 1)
 				{
 					tmp_round_winner = winner_client_name + " is the winner of the round!";
 				}
@@ -593,8 +598,8 @@ namespace Server
 				}
 				else
 				{
-                    tmp_round_winner = "This round it is a tie for everyone.";
-                }
+					tmp_round_winner = "This round it is a tie for everyone.";
+				}
 
 				// Concatenate the player name with their answer and broadcast it to the each client
 				String answare_info = "Answers: real : " + lines[(2 * q) % (lines.Length) + 1] + "\n";
@@ -708,6 +713,8 @@ namespace Server
 			if (Int32.TryParse(number_of_questions.Text, out question_num))
 			{
 				//reads all lines and stores all lines in string array
+				gaming_client_names = new List<String>(client_names);
+				gaming_client_sockets = new List<Socket>(client_sockets);
 				List<Socket> disconnected_clients = new List<Socket>();
 				foreach (Socket client in client_sockets)
 				{
