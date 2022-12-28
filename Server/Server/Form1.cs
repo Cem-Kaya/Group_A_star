@@ -34,6 +34,7 @@ namespace Server
 		List<Socket> gaming_client_sockets = new List<Socket>();
 		List<String> client_names = new List<String>();
 		List<String> gaming_client_names = new List<String>();
+		List<String> observer_names = new List<String>();
 		bool game_started = false;
 
 		// Semaphore first_sem = new // Semaphore(0, 3); //  for step one 3 is known 
@@ -132,6 +133,7 @@ namespace Server
 								logs.AppendText("Client with name " + this_threads_name + " is connected as an observer!\n");
 								Byte[] game_stat = Encoding.Default.GetBytes("A game is in progress please wait until it is over! \n");
 								newClient.Send(game_stat);
+								observer_names.Add(this_threads_name);
 							}
 							//num_of_players++;
 
@@ -479,7 +481,10 @@ namespace Server
 						{
 							player_scores[disconnected_players_name] = 0.0f;
 							gaming_client_names.Remove(disconnected_players_name);
-							client_names.Remove(disconnected_players_name);
+							if (!observer_names.Contains(disconnected_players_name))
+							{
+								client_names.Remove(disconnected_players_name);
+							}
 							//client_sockets.Remove(cl);
 							//add cl socket to discon_socs socket list
 							discon_socs.Add(cl);
@@ -684,6 +689,7 @@ namespace Server
 			terminating = false;
 			//listening = false;
 			question = false;
+			observer_names = new List<String>();
 
 			//max_num_of_clients = 2;
 			//num_of_players = 0;
