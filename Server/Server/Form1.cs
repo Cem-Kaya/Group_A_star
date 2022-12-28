@@ -584,7 +584,7 @@ namespace Server
 
 				}
 
-				if (!is_a_tie && gaming_client_names.Count() > 1)
+				if (!is_a_tie || only_one_client_remaining)
 				{
 					tmp_round_winner = winner_client_name + " is the winner of the round!";
 				}
@@ -614,11 +614,19 @@ namespace Server
 				// Concatenate the player with their associated score and broadcast it to the each client
 
 				String score_info = "Current scores: ";
-				foreach (var pl in gaming_client_names)
+				//add player_scores[pl] for each pl to score_info in descending order
+				var sortedscores = from entry in player_scores orderby entry.Value descending select entry;
+				foreach (var pl in sortedscores)
 				{
-					score_info += pl + " : " + player_scores[pl] + " ";
-
+					score_info += pl.Key + " : " + pl.Value + " ";
 				}
+
+
+				//foreach (var pl in gaming_client_names)
+				//{
+				//	score_info += pl + ": " + player_scores[pl] + " ";
+
+				//}
 				score_info += "\n" + tmp_round_winner + "\n";
 				broadcast("SCORE" + score_info);
 
