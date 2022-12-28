@@ -11,6 +11,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Web;
+using System.Data.SqlTypes;
 
 namespace Server
 {
@@ -504,9 +506,9 @@ namespace Server
 
 				Dictionary<string, int> name_dif = new Dictionary<string, int>();
 				bool is_a_tie = false;
+				List<String> winner_clients = new List<String>();
 				String winner_client_name = "";
 				String tmp_round_winner = "";
-
 
 				//checking clients' answers and saving the real answer-client answer differences
 				foreach (string client_name in gaming_client_names)
@@ -520,11 +522,13 @@ namespace Server
 					}
 				}
 				//if all values in name_dif are equal to each other then update the player scores by increasing them all by 0.5
+
 				if (name_dif.Values.Distinct().Count() == 1)
 				{
 					foreach (string client_name in gaming_client_names)
 					{
-						player_scores[client_name] += 0.5f;
+						// Niye cevap her zaman 0 geliyor ?
+						player_scores[client_name] += 1.0f / gaming_client_names.Count();
 					}
 					is_a_tie = true;
 				}
@@ -533,12 +537,37 @@ namespace Server
 					// Sort the difference dictionary to pull out the max score.
 					var sortedDict = from entry in name_dif orderby entry.Value ascending select entry;
 					int max_score = sortedDict.First().Value;
+					int same_answer_counter = 0;
+
+					foreach(int value in name_dif.Values)
+					{
+						if (value == max_score)
+							same_answer_counter++;
+					}
+
+					if (same_answer_counter > 1)
+						is_a_tie = true;
 
 					// magic !
 					var keys = sortedDict.Where(x => x.Value == max_score).Select(x => x.Key);
 					// Update the player scores
-					player_scores[keys.First()] += 1.0f;
-					winner_client_name = keys.First();
+
+					foreach(var key in keys)
+					{
+						player_scores[key] += 1.0f / same_answer_counter;
+					}
+
+					if(!is_a_tie)
+					{
+						winner_client_name = keys.First();
+					}
+					else
+					{
+						foreach(var key in keys)
+						{
+							winner_clients.Add(key);
+						}
+					}
 					/*
 					foreach (String Pl in keys)
 					{
@@ -550,20 +579,23 @@ namespace Server
 
 				}
 
-
-
-
-
-
 				if (!is_a_tie)
 				{
 					tmp_round_winner = winner_client_name + " is the winner of the round!";
 				}
+				else if (is_a_tie && name_dif.Values.Distinct().Count() != 1)
+				{
+					tmp_round_winner = "This round it is a tie for:";
+					foreach(var key in winner_clients)
+					{
+						tmp_round_winner += key + ", ";
+					}
+				}
 				else
 				{
-					tmp_round_winner = "This round it is a tie.";
+                    tmp_round_winner = "This round it is a tie for everyone.";
+                }
 
-				}
 				// Concatenate the player name with their answer and broadcast it to the each client
 				String answare_info = "Answers: real : " + lines[(2 * q) % (lines.Length) + 1] + "\n";
 				foreach (var pl in gaming_client_names)
